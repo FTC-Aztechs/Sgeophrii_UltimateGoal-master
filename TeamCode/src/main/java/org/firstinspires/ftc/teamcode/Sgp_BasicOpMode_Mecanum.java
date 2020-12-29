@@ -131,6 +131,7 @@ public class Sgp_BasicOpMode_Mecanum extends OpMode
         upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10));
 
         // Show the elapsed game time and wheel power.
+        
         telemetry.addData("Status", "Run Time: " + runtime.toString());
        telemetry.addData("Speed Adjust", speedAdjust) ;
     }

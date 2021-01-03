@@ -133,7 +133,7 @@ public class Sgp_BasicOpMode_Mecanum extends OpMode
 
         // Show the elapsed game time and wheel power.
 
-        
+
         telemetry.addData("Status", "Run Time: " + runtime.toString());
        telemetry.addData("Speed Adjust", speedAdjust) ;
     }

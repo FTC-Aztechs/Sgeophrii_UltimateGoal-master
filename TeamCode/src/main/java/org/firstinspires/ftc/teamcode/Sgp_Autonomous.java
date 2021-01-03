@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -61,20 +62,20 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Autonomous test", group="Drive")
+@Autonomous(name="Sgp_Autonomous", group="Autonomous Mode")
 public class Sgp_Autonomous extends LinearOpMode {
 
     /* Declare OpMode members. */
-    SgpRobot robot   = new SgpRobot();   // Use a Pushbot's hardware
-    private ElapsedTime     runtime = new ElapsedTime();
+    SgpRobot robot = new SgpRobot();   // Use a Pushbot's hardware
+    private ElapsedTime runtime = new ElapsedTime();
 
-    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 3.779;     // For figuring circumference
-    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                                      (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
+    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
+    static final double WHEEL_DIAMETER_INCHES = 3.779;     // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double DRIVE_SPEED = 0.6;
+    static final double TURN_SPEED = 0.5;
 
     @Override
     public void runOpMode() {
@@ -84,61 +85,124 @@ public class Sgp_Autonomous extends LinearOpMode {
          * The init() method of the hardware class does all the work here
          */
         robot.init(hardwareMap);
+        Servo Wrist_1 = hardwareMap.get(Servo.class, "Wrist_1" );
+        Servo Wrist_2 = hardwareMap.get(Servo.class, "Wrist_2");
+        Servo Claw = hardwareMap.get(Servo.class, "Finger");
+        Wrist_1.setPosition(0.5);
+        Wrist_2.setPosition(0.5);
+        Claw.setPosition (0.5);
 
-        // Send telemetry message to signify robot waiting;
-        telemetry.addData("Status", "Resetting Encoders");    //
+        //robot.Arm_Motor.setPower(0.1);
+
+        telemetry.addData("Status", "Init Hardware");
         telemetry.update();
 
         robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Send telemetry message to indicate successful Encoder reset
-        telemetry.addData("Path0",  "Starting at %7d :%7d",
-                          robot.getCurrentPosition(SgpRobot.SgpMotors.LEFT),
-                          robot.getCurrentPosition(SgpRobot.SgpMotors.RIGHT));
-        telemetry.update();
-
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-//        encoderDrive(DRIVE_SPEED,  12,  12, 4.0);  // S1: Forward 12 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   9.5, -9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -9.5, 9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        sleep(1000);     // pause for servos to move
-        telemetry.addData("Turn 9.5", "Complete");
+        int Position = getWobbleDropPosition();
+        telemetry.addData("Wobble Position", "Going to position: %d ", Position );
         telemetry.update();
+        sleep(5000);
 
-        encoderDrive(TURN_SPEED,   19, -19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -19, 19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        sleep(1000);     // pause for servos to move
-        telemetry.addData("Turn 19", "Complete");
-        telemetry.update();
+        switch (Position) {
+            case 0:
+                // Start from initial position, go to drop zone A,
+                // drop the wobble goal, trace back to launch zone
+                WobbleDropPositionA();
+                break;
+            case 1:
+                WobbleDropPositionB();
+                break;
+            case 2:
+                WobbleDropPositionC();
+                break;
+        }
+        sleep(5000);
 
-        encoderDrive(TURN_SPEED,   4, -4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -4, 4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        sleep(1000);     // pause for servos to move
-        telemetry.addData("Turn 4", "Complete");
-        telemetry.update();
+        // Pickup the second wobble goal
+        PickupWobble2();
+        sleep(1000);
 
-        encoderDrive(TURN_SPEED,   11.87, -11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        encoderDrive(TURN_SPEED,   -11.87, 11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-        sleep(1000);     // pause for servos to move
-        telemetry.addData("Turn 11.87", "Complete");
-        telemetry.update();
+        switch (Position) {
+            case 0:
+                // Start from initial position, go to drop zone A,
+                // drop the wobble goal, trace back to launch zone
+                WobbleDropPositionA();
+                break;
+            case 1:
+             //   WobbleDropPositionB();
+                break;
+            case 2:
+                WobbleDropPositionC();
+                break;
+        }
 
-////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        // Shoot preloaded rings
+        shootPreloadedRings();
 
-        sleep(1000);     // pause for servos to move
+        // Navigate to stop on launch line.
+        navigateToLaunchLine();
 
-        telemetry.addData("Path", "Complete");
+        telemetry.addData("Autonomous", "Complete");
         telemetry.update();
     }
+
+    public int getWobbleDropPosition() {
+        return 1;
+    }
+
+    public void WobbleDropPositionA() {
+        telemetry.addData("Status" , "Reached Position A");
+        telemetry.update();
+
+        return;
+    }
+
+    public void WobbleDropPositionB() {
+
+        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+
+        telemetry.addData("Status" , "Reached Position B");
+        telemetry.update();
+
+        return;
+    }
+
+    public void WobbleDropPositionC() {
+        telemetry.addData("Status" , "Reached Position C");
+        telemetry.update();
+
+        return;
+    }
+
+    public void PickupWobble2()
+    {
+        telemetry.addData("Status" , "Picked up Wobble 2");
+        telemetry.update();
+
+        return;
+    }
+
+    public void shootPreloadedRings()
+    {
+        telemetry.addData("Status" , "Picked up Wobble 2");
+        telemetry.update();
+
+        return;
+    }
+
+    public void navigateToLaunchLine()
+    {
+        telemetry.addData("Status" , "Navigation to launch line completed");
+        telemetry.update();
+
+        return;
+    }
+
 
     /*
      *  Method to perform a relative move, based on encoder counts.
@@ -179,14 +243,14 @@ public class Sgp_Autonomous extends LinearOpMode {
             // However, if you require that BOTH motors have finished their moves before the robot continues
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
-                   (runtime.seconds() < timeoutS) &&
-                   (robot.areDrivesBusy(SgpRobot.SgpMotors.LEFT) && robot.areDrivesBusy(SgpRobot.SgpMotors.RIGHT))) {
+                    (runtime.seconds() < timeoutS) &&
+                    (robot.areDrivesBusy(SgpRobot.SgpMotors.LEFT) && robot.areDrivesBusy(SgpRobot.SgpMotors.RIGHT))) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d",
-                                            robot.getCurrentPosition(SgpRobot.SgpMotors.LEFT),
-                                            robot.getCurrentPosition(SgpRobot.SgpMotors.RIGHT));
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.LEFT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.RIGHT));
                 telemetry.update();
             }
 
@@ -202,3 +266,40 @@ public class Sgp_Autonomous extends LinearOpMode {
         }
     }
 }
+
+
+// Test code
+// Step through each leg of the path,
+// Note: Reverse movement is obtained by setting a negative distance (not speed)
+//        encoderDrive(DRIVE_SPEED,  12,  12, 4.0);  // S1: Forward 12 Inches with 5 Sec timeout
+//encoderDrive(TURN_SPEED, 9.5, -9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//    encoderDrive(TURN_SPEED, -9.5, 9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//    sleep(1000);     // pause for servos to move
+//        telemetry.addData("Turn 9.5", "Complete");
+//                telemetry.update();
+//
+//                encoderDrive(TURN_SPEED, 19, -19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                encoderDrive(TURN_SPEED, -19, 19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                sleep(1000);     // pause for servos to move
+//                telemetry.addData("Turn 19", "Complete");
+//                telemetry.update();
+//
+//                encoderDrive(TURN_SPEED, 4, -4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                encoderDrive(TURN_SPEED, -4, 4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                sleep(1000);     // pause for servos to move
+//                telemetry.addData("Turn 4", "Complete");
+//                telemetry.update();
+//
+//                encoderDrive(TURN_SPEED, 11.87, -11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                encoderDrive(TURN_SPEED, -11.87, 11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+//                sleep(1000);     // pause for servos to move
+//                telemetry.addData("Turn 11.87", "Complete");
+//                telemetry.update();
+//
+////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+////        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+////        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
+////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+//
+//                sleep(1000);     // pause for servos to move

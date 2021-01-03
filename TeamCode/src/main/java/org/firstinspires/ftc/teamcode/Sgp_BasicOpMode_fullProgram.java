@@ -64,9 +64,6 @@ public class Sgp_BasicOpMode_fullProgram extends OpMode
     private Servo Wrist_2 = null;
     private Servo Finger = null;
 
-
-
-
     /*
      * Code to run ONCE when the driver hits INIT
      */

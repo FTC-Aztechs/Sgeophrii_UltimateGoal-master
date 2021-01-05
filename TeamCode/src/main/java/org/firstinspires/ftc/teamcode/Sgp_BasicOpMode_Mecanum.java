@@ -49,7 +49,7 @@ import com.qualcomm.robotcore.util.Range;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-
+@Disabled
 @TeleOp(name="Basic: Iterative Mecanum", group="Iterative Opmode")
 // @Disabled
 public class Sgp_BasicOpMode_Mecanum extends OpMode
@@ -135,7 +135,7 @@ public class Sgp_BasicOpMode_Mecanum extends OpMode
 
 
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-       telemetry.addData("Speed Adjust", speedAdjust) ;
+        telemetry.addData("Speed Adjust", speedAdjust) ;
     }
 
     /*

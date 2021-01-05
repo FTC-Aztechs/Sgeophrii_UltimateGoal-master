@@ -62,6 +62,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
+@Disabled
 @Autonomous(name="Concept: Auto Drive By Encoder", group="Drive")
 public class Sgp_AutoDriveByEncoder extends LinearOpMode {
 
@@ -155,7 +156,7 @@ public class Sgp_AutoDriveByEncoder extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                    (runtime.seconds() < timeoutS) &&
-                   (robot.areDrivesBusy(SgpRobot.SgpMotors.UPPER_LEFT) && robot.areDrivesBusy(SgpRobot.SgpMotors.UPPER_RIGHT))) {
+                   (robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_LEFT) && robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_RIGHT))) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);

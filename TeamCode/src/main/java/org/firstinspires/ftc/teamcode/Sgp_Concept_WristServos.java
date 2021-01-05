@@ -32,6 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.configuration.ServoControllerConfiguration;
@@ -50,10 +52,11 @@ import com.qualcomm.robotcore.hardware.configuration.ServoControllerConfiguratio
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
+@Disabled
 @TeleOp(name = "Concept: Sgp Wrist Servos", group = "Concept")
 public class Sgp_Concept_WristServos extends LinearOpMode {
 
-    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
+    static final double INCREMENT   = 0.1;     // amount to slew servo each CYCLE_MS cycle
     static final int    CYCLE_MS    =   50;     // period of each cycle
     static final double[] RANGE_FULL= {0.0, 1.0};
     static final double[] RANGE_TOP_HALF = {0.5, 1.0};
@@ -65,6 +68,7 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
     Servo   Claw;
     Servo   activeServo = null;
     ServoController activeServoController = null;
+    DcMotor armMotor = null;
     boolean rampUp = true;
     double[] range = RANGE_FULL;
     double  position = (range[1] - range[0]) / 2; // Start at halfway position
@@ -78,7 +82,12 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
         Wrist_1 = hardwareMap.get(Servo.class, "Wrist_1" );
         Wrist_2 = hardwareMap.get(Servo.class, "Wrist_2");
         Claw = hardwareMap.get(Servo.class, "Finger");
+        armMotor = hardwareMap.get(DcMotor.class, "Arm_Motor");
         boolean buttonPressed = false;
+
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setPower(0);
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -94,6 +103,7 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
         // Scan servo till stop pressed.
         while(opModeIsActive()){
 
+            armMotor.setPower(0);
             // If trigger is pulled, ramp down, otherwise ramp up.
             rampUp = gamepad2.right_trigger == 0f;
 

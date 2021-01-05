@@ -46,6 +46,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.Locale;
 
@@ -77,6 +78,9 @@ public class SgpRobot
         RIGHT,
         UPPER,
         LOWER,
+        ARM_MOTOR,
+        BRAVO6,
+        BATMAN_BELT,
         ALL
     }
     /* Public OpMode members. */
@@ -92,6 +96,8 @@ public class SgpRobot
     public Servo Finger = null;
     public ServoController FingerController = null;
     public BNO055IMU imu_gyro = null;
+    OpenCvInternalCamera phoneCam;
+    EasyOpenCVExample.SkystoneDeterminationPipeline pipeline;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -270,11 +276,23 @@ public class SgpRobot
                 upper_right.setMode(eMode);
                 upper_left.setMode(eMode);
                 break;
+            case ARM_MOTOR:
+                Arm_Motor.setMode(eMode);
+                break;
+            case BRAVO6:
+                Bravo_6.setMode(eMode);
+                break;
+            case BATMAN_BELT:
+                Batman_Belt.setMode(eMode);
+                break;
             case ALL:
                 lower_right.setMode(eMode);
                 lower_left.setMode(eMode);
                 upper_right.setMode(eMode);
                 upper_left.setMode(eMode);
+                Arm_Motor.setMode(eMode);
+                Batman_Belt.setMode(eMode);
+                Bravo_6.setMode(eMode);
                 break;
         }
     }
@@ -311,11 +329,23 @@ public class SgpRobot
                 upper_right.setPower(dPower);
                 upper_left.setPower(dPower);
                 break;
+            case BATMAN_BELT:
+                Batman_Belt.setPower(dPower);
+                break;
+            case BRAVO6:
+                Bravo_6.setPower(dPower);
+                break;
+            case ARM_MOTOR:
+                Arm_Motor.setPower(dPower);
+                break;
             case ALL:
                 lower_right.setPower(dPower);
                 lower_left.setPower(dPower);
                 upper_right.setPower(dPower);
                 upper_left.setPower(dPower);
+                Arm_Motor.setPower(dPower);
+                Batman_Belt.setPower(dPower);
+                Bravo_6.setPower(dPower);
                 break;
         }
     }
@@ -332,17 +362,17 @@ public class SgpRobot
                 return upper_right.getCurrentPosition();
             case LOWER_RIGHT:
                 return lower_right.getCurrentPosition();
+            case ARM_MOTOR:
+                return Arm_Motor.getCurrentPosition();
+            case BRAVO6:
+                return Bravo_6.getCurrentPosition();
+            case BATMAN_BELT:
+                return Batman_Belt.getCurrentPosition();
             case RIGHT:
-                return (upper_right.getCurrentPosition()+ lower_right.getCurrentPosition())/2;
             case LEFT:
-                return (upper_left.getCurrentPosition() + lower_left.getCurrentPosition())/2;
             case UPPER:
-                return ( upper_left.getCurrentPosition() + upper_right.getCurrentPosition())/2;
             case LOWER:
-                return (lower_left.getCurrentPosition() + lower_right.getCurrentPosition())/2;
             case ALL:
-                return (upper_left.getCurrentPosition() + upper_right.getCurrentPosition() +
-                        lower_left.getCurrentPosition() + lower_right.getCurrentPosition())/4;
             default:
                 return 0;
         }
@@ -364,35 +394,26 @@ public class SgpRobot
             case LOWER_RIGHT:
                 lower_right.setTargetPosition(iPos);
                 break;
+            case BATMAN_BELT:
+                Batman_Belt.setTargetPosition(iPos);
+                break;
+            case BRAVO6:
+                Bravo_6.setTargetPosition(iPos);
+                break;
+            case ARM_MOTOR:
+                Arm_Motor.setTargetPosition(iPos);
+                break;
             case LEFT:
-                upper_left.setTargetPosition(iPos);
-                lower_left.setTargetPosition(iPos);
-                break;
             case RIGHT:
-                upper_right.setTargetPosition(iPos);
-                lower_right.setTargetPosition(iPos);
-                break;
             case LOWER:
-                lower_left.setTargetPosition(iPos);
-                lower_right.setTargetPosition(iPos);
-                break;
             case UPPER:
-                upper_right.setTargetPosition(iPos);
-                upper_left.setTargetPosition(iPos);
-                break;
             case ALL:
-                upper_right.setTargetPosition(iPos);
-                upper_left.setTargetPosition(iPos);
-                lower_left.setTargetPosition(iPos);
-                lower_right.setTargetPosition(iPos);
-                break;
-
             default :
                 break;
         }
     }
 
-    public boolean areDrivesBusy(SgpMotors eWhichMotor) {
+    public boolean areMotorsBusy(SgpMotors eWhichMotor) {
 
         switch(eWhichMotor)
         {
@@ -404,6 +425,12 @@ public class SgpRobot
                 return upper_right.isBusy();
             case LOWER_RIGHT: // lower right
                 return lower_right.isBusy();
+            case BRAVO6:
+                return Bravo_6.isBusy();
+            case BATMAN_BELT:
+                return Batman_Belt.isBusy();
+            case ARM_MOTOR:
+                return  Arm_Motor.isBusy();
             case LEFT: // left side
                 return (lower_left.isBusy() && upper_left.isBusy());
             case RIGHT: // right side

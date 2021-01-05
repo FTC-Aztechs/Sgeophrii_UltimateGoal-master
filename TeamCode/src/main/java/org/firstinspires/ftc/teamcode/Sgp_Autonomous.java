@@ -35,6 +35,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvPipeline;
+
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
  * It uses the common Pushbot hardware class to define the drive on the robot.
@@ -103,40 +115,40 @@ public class Sgp_Autonomous extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        int Position = getWobbleDropPosition();
-        telemetry.addData("Wobble Position", "Going to position: %d ", Position );
+        SgpDeterminationPipeline.RingPosition Position = getWobbleDropPosition();
+        telemetry.addData("Wobble Position: ", Position );
         telemetry.update();
-        sleep(5000);
+//        sleep(5000);
 
         switch (Position) {
-            case 0:
+            case NONE:
                 // Start from initial position, go to drop zone A,
                 // drop the wobble goal, trace back to launch zone
                 WobbleDropPositionA();
                 break;
-            case 1:
+            case ONE:
                 WobbleDropPositionB();
                 break;
-            case 2:
+            case FOUR:
                 WobbleDropPositionC();
                 break;
         }
-        sleep(5000);
+//        sleep(5000);
 
         // Pickup the second wobble goal
         PickupWobble2();
-        sleep(1000);
+//        sleep(1000);
 
         switch (Position) {
-            case 0:
+            case NONE:
                 // Start from initial position, go to drop zone A,
                 // drop the wobble goal, trace back to launch zone
                 WobbleDropPositionA();
                 break;
-            case 1:
-             //   WobbleDropPositionB();
+            case ONE:
+                WobbleDropPositionB();
                 break;
-            case 2:
+            case FOUR:
                 WobbleDropPositionC();
                 break;
         }
@@ -151,11 +163,35 @@ public class Sgp_Autonomous extends LinearOpMode {
         telemetry.update();
     }
 
-    public int getWobbleDropPosition() {
-        return 1;
+    public SgpDeterminationPipeline.RingPosition getWobbleDropPosition()
+    {
+        final OpenCvInternalCamera phoneCam;
+        SgpDeterminationPipeline pipeline;
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
+        pipeline = new SgpDeterminationPipeline();
+        phoneCam.setPipeline(pipeline);
+
+        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+        // out when the RC activity is in portrait. We do our actual image processing assuming
+        // landscape orientation, though.
+        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+
+        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+        });
+
+        return SgpDeterminationPipeline.RingPosition.ONE;
     }
 
     public void WobbleDropPositionA() {
+        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         telemetry.addData("Status" , "Reached Position A");
         telemetry.update();
 
@@ -173,6 +209,7 @@ public class Sgp_Autonomous extends LinearOpMode {
     }
 
     public void WobbleDropPositionC() {
+        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         telemetry.addData("Status" , "Reached Position C");
         telemetry.update();
 
@@ -222,19 +259,20 @@ public class Sgp_Autonomous extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.LEFT)+ (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.RIGHT)+ (int)(rightInches * COUNTS_PER_INCH);
+            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT)+ (int)(leftInches * COUNTS_PER_INCH);
+            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT)+ (int)(rightInches * COUNTS_PER_INCH);
 
-            robot.setTargetPosition(SgpRobot.SgpMotors.LEFT, newLeftTarget);
-            robot.setTargetPosition(SgpRobot.SgpMotors.RIGHT, newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, newLeftTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
 
             // Turn On RUN_TO_POSITION
-            robot.setRunMode(SgpRobot.SgpMotors.LEFT, DcMotor.RunMode.RUN_TO_POSITION);
-            robot.setRunMode(SgpRobot.SgpMotors.RIGHT, DcMotor.RunMode.RUN_TO_POSITION);
+            robot.setRunMode(SgpRobot.SgpMotors.UPPER_LEFT, DcMotor.RunMode.RUN_TO_POSITION);
+            robot.setRunMode(SgpRobot.SgpMotors.UPPER_RIGHT, DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            robot.setPower(SgpRobot.SgpMotors.ALL, Math.abs(speed));
+            robot.setPower(SgpRobot.SgpMotors.UPPER_LEFT, Math.abs(speed));
+            robot.setPower(SgpRobot.SgpMotors.UPPER_RIGHT, Math.abs(speed));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -244,25 +282,129 @@ public class Sgp_Autonomous extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (robot.areDrivesBusy(SgpRobot.SgpMotors.LEFT) && robot.areDrivesBusy(SgpRobot.SgpMotors.RIGHT))) {
+                    (robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_LEFT) && robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_RIGHT))) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
                 telemetry.addData("Path2",  "Running at %7d :%7d",
-                        robot.getCurrentPosition(SgpRobot.SgpMotors.LEFT),
-                        robot.getCurrentPosition(SgpRobot.SgpMotors.RIGHT));
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT));
                 telemetry.update();
             }
 
             // Stop all motion;
-            robot.setPower(SgpRobot.SgpMotors.LEFT, 0);
-            robot.setPower(SgpRobot.SgpMotors.RIGHT, 0);
+            robot.setPower(SgpRobot.SgpMotors.UPPER_LEFT, 0);
+            robot.setPower(SgpRobot.SgpMotors.UPPER_RIGHT, 0);
 
             // Turn off RUN_TO_POSITION
-            robot.setRunMode(SgpRobot.SgpMotors.LEFT, DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.setRunMode(SgpRobot.SgpMotors.RIGHT, DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.setRunMode(SgpRobot.SgpMotors.UPPER_LEFT, DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.setRunMode(SgpRobot.SgpMotors.UPPER_RIGHT, DcMotor.RunMode.RUN_USING_ENCODER);
 
             //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    public static class SgpDeterminationPipeline extends OpenCvPipeline
+    {
+        /*
+         * An enum to define the skystone position
+         */
+        public enum RingPosition
+        {
+            FOUR,
+            ONE,
+            NONE
+        }
+
+        /*
+         * Some color constants
+         */
+        static final Scalar BLUE = new Scalar(0, 0, 255);
+        static final Scalar GREEN = new Scalar(0, 255, 0);
+
+        /*
+         * The core values which define the location and size of the sample regions
+         */
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(181,98);
+
+        static final int REGION_WIDTH = 35;
+        static final int REGION_HEIGHT = 25;
+
+        final int FOUR_RING_THRESHOLD = 150;
+        final int ONE_RING_THRESHOLD = 135;
+
+        Point region1_pointA = new Point(
+                REGION1_TOPLEFT_ANCHOR_POINT.x,
+                REGION1_TOPLEFT_ANCHOR_POINT.y);
+        Point region1_pointB = new Point(
+                REGION1_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
+                REGION1_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
+
+        /*
+         * Working variables
+         */
+        Mat region1_Cb;
+        Mat YCrCb = new Mat();
+        Mat Cb = new Mat();
+        int avg1;
+
+        // Volatile since accessed by OpMode thread w/o synchronization
+        private volatile SgpDeterminationPipeline.RingPosition position = SgpDeterminationPipeline.RingPosition.FOUR;
+
+        /*
+         * This function takes the RGB frame, converts to YCrCb,
+         * and extracts the Cb channel to the 'Cb' variable
+         */
+        void inputToCb(Mat input)
+        {
+            Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
+            Core.extractChannel(YCrCb, Cb, 1);
+        }
+
+        @Override
+        public void init(Mat firstFrame)
+        {
+            inputToCb(firstFrame);
+
+            region1_Cb = Cb.submat(new Rect(region1_pointA, region1_pointB));
+        }
+
+        @Override
+        public Mat processFrame(Mat input)
+        {
+            inputToCb(input);
+
+            avg1 = (int) Core.mean(region1_Cb).val[0];
+
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    region1_pointA, // First point which defines the rectangle
+                    region1_pointB, // Second point which defines the rectangle
+                    BLUE, // The color the rectangle is drawn in
+                    2); // Thickness of the rectangle lines
+
+            position = SgpDeterminationPipeline.RingPosition.FOUR; // Record our analysis
+            if(avg1 > FOUR_RING_THRESHOLD){
+                position = SgpDeterminationPipeline.RingPosition.FOUR;
+            }else if (avg1 > ONE_RING_THRESHOLD){
+                position = SgpDeterminationPipeline.RingPosition.ONE;
+            }else{
+                position = SgpDeterminationPipeline.RingPosition.NONE;
+            }
+
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    region1_pointA, // First point which defines the rectangle
+                    region1_pointB, // Second point which defines the rectangle
+                    GREEN, // The color the rectangle is drawn in
+                    -1); // Negative thickness means solid fill
+
+            return input;
+        }
+
+        public int getAnalysis()
+        {
+            return avg1;
         }
     }
 }

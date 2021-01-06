@@ -191,7 +191,7 @@ public class Sgp_Autonomous extends LinearOpMode {
     }
 
     public void WobbleDropPositionA() {
-        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoDrive(DRIVE_SPEED, 66, 66, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         telemetry.addData("Status" , "Reached Position A");
         telemetry.update();
 
@@ -200,7 +200,8 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     public void WobbleDropPositionB() {
 
-        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoDrive(DRIVE_SPEED, 90, 90, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 4.0);
 
         telemetry.addData("Status" , "Reached Position B");
         telemetry.update();
@@ -209,7 +210,7 @@ public class Sgp_Autonomous extends LinearOpMode {
     }
 
     public void WobbleDropPositionC() {
-        encoderDrive(DRIVE_SPEED, 24, 24, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoDrive(DRIVE_SPEED, 112, 112, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         telemetry.addData("Status" , "Reached Position C");
         telemetry.update();
 
@@ -243,15 +244,16 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     /*
      *  Method to perform a relative move, based on encoder counts.
-     *  Encoders are not reset as the move is based on the current position.
      *  Move will stop if any of three conditions occur:
      *  1) Move gets to the desired position
      *  2) Move runs out of time
      *  3) Driver stops the opmode running.
+     *  4) Any of the motors stops
      */
-    public void encoderDrive(double speed,
+    public void sgpAutoDrive(double speed,
                              double leftInches, double rightInches,
-                             double timeoutS) {
+                             double timeoutS)
+    {
         int newLeftTarget;
         int newRightTarget;
 
@@ -263,16 +265,16 @@ public class Sgp_Autonomous extends LinearOpMode {
             newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT)+ (int)(rightInches * COUNTS_PER_INCH);
 
             robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, newLeftTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newLeftTarget);
             robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, newRightTarget);
 
             // Turn On RUN_TO_POSITION
-            robot.setRunMode(SgpRobot.SgpMotors.UPPER_LEFT, DcMotor.RunMode.RUN_TO_POSITION);
-            robot.setRunMode(SgpRobot.SgpMotors.UPPER_RIGHT, DcMotor.RunMode.RUN_TO_POSITION);
+            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
 
             // reset the timeout time and start motion.
             runtime.reset();
-            robot.setPower(SgpRobot.SgpMotors.UPPER_LEFT, Math.abs(speed));
-            robot.setPower(SgpRobot.SgpMotors.UPPER_RIGHT, Math.abs(speed));
+            robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, Math.abs(speed));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -282,25 +284,62 @@ public class Sgp_Autonomous extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_LEFT) && robot.areMotorsBusy(SgpRobot.SgpMotors.UPPER_RIGHT))) {
-
-                // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d",
+                    (robot.areMotorsBusy(SgpRobot.SgpMotors.ALL_DRIVES)) )
+            {
+                telemetry.addData("Target positions", "Left %7d : Right %7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Current position", "Upper_Left %7d : Lower_Right %7d : Upper_Right %7d : Lower_Left %7d",
                         robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT),
-                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT));
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_RIGHT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_LEFT));
                 telemetry.update();
             }
 
             // Stop all motion;
-            robot.setPower(SgpRobot.SgpMotors.UPPER_LEFT, 0);
-            robot.setPower(SgpRobot.SgpMotors.UPPER_RIGHT, 0);
+            robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, 0);
 
             // Turn off RUN_TO_POSITION
-            robot.setRunMode(SgpRobot.SgpMotors.UPPER_LEFT, DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.setRunMode(SgpRobot.SgpMotors.UPPER_RIGHT, DcMotor.RunMode.RUN_USING_ENCODER);
-
+            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_USING_ENCODER);
             //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    public void sgpAutoStrafe(double speed, double leftInches, double rightInches, double timeoutS) {
+        int newLeftTarget;
+        int newRightTarget;
+
+        robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.RUN_USING_ENCODER);
+
+        if (opModeIsActive()) {
+            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT) + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT) + (int) (rightInches * COUNTS_PER_INCH);
+
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, newLeftTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, newLeftTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newRightTarget);
+
+            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
+
+            runtime.reset();
+            robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, Math.abs(speed));
+
+            while (opModeIsActive()
+                    && runtime.seconds() < timeoutS
+                    && robot.areMotorsBusy(SgpRobot.SgpMotors.ALL_DRIVES)) {
+                telemetry.addData("Target positions", "Left %7d : Right %7d", newLeftTarget, newRightTarget);
+                telemetry.addData("Current position", "Upper_Left %7d : Lower_Right %7d : Upper_Right %7d : Lower_Left %7d",
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_RIGHT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT),
+                        robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_LEFT));
+                telemetry.update();
+            }
+
+            // Stop all motion
+            robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, 0);
+            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
 

@@ -74,13 +74,10 @@ public class SgpRobot
         LOWER_LEFT,
         UPPER_RIGHT,
         LOWER_RIGHT,
-        LEFT,
-        RIGHT,
-        UPPER,
-        LOWER,
         ARM_MOTOR,
         BRAVO6,
         BATMAN_BELT,
+        ALL_DRIVES,
         ALL
     }
     /* Public OpMode members. */
@@ -260,22 +257,6 @@ public class SgpRobot
             case LOWER_RIGHT:
                 lower_right.setMode(eMode);
                 break;
-            case LEFT:
-                lower_left.setMode(eMode);
-                upper_left.setMode(eMode);
-                break;
-            case RIGHT:
-                lower_right.setMode(eMode);
-                upper_right.setMode(eMode);
-                break;
-            case LOWER:
-                lower_right.setMode(eMode);
-                lower_left.setMode(eMode);
-                break;
-            case UPPER:
-                upper_right.setMode(eMode);
-                upper_left.setMode(eMode);
-                break;
             case ARM_MOTOR:
                 Arm_Motor.setMode(eMode);
                 break;
@@ -293,6 +274,12 @@ public class SgpRobot
                 Arm_Motor.setMode(eMode);
                 Batman_Belt.setMode(eMode);
                 Bravo_6.setMode(eMode);
+                break;
+            case ALL_DRIVES:
+                lower_right.setMode(eMode);
+                lower_left.setMode(eMode);
+                upper_right.setMode(eMode);
+                upper_left.setMode(eMode);
                 break;
         }
     }
@@ -313,22 +300,6 @@ public class SgpRobot
             case LOWER_RIGHT:
                 lower_right.setPower(dPower);
                 break;
-            case LEFT:
-                lower_left.setPower(dPower);
-                upper_left.setPower(dPower);
-                break;
-            case RIGHT:
-                lower_right.setPower(dPower);
-                upper_right.setPower(dPower);
-                break;
-            case LOWER:
-                lower_right.setPower(dPower);
-                lower_left.setPower(dPower);
-                break;
-            case UPPER:
-                upper_right.setPower(dPower);
-                upper_left.setPower(dPower);
-                break;
             case BATMAN_BELT:
                 Batman_Belt.setPower(dPower);
                 break;
@@ -346,6 +317,12 @@ public class SgpRobot
                 Arm_Motor.setPower(dPower);
                 Batman_Belt.setPower(dPower);
                 Bravo_6.setPower(dPower);
+                break;
+            case ALL_DRIVES:
+                lower_right.setPower(dPower);
+                lower_left.setPower(dPower);
+                upper_right.setPower(dPower);
+                upper_left.setPower(dPower);
                 break;
         }
     }
@@ -368,11 +345,8 @@ public class SgpRobot
                 return Bravo_6.getCurrentPosition();
             case BATMAN_BELT:
                 return Batman_Belt.getCurrentPosition();
-            case RIGHT:
-            case LEFT:
-            case UPPER:
-            case LOWER:
             case ALL:
+            case ALL_DRIVES:
             default:
                 return 0;
         }
@@ -403,11 +377,8 @@ public class SgpRobot
             case ARM_MOTOR:
                 Arm_Motor.setTargetPosition(iPos);
                 break;
-            case LEFT:
-            case RIGHT:
-            case LOWER:
-            case UPPER:
             case ALL:
+            case ALL_DRIVES:
             default :
                 break;
         }
@@ -431,15 +402,7 @@ public class SgpRobot
                 return Batman_Belt.isBusy();
             case ARM_MOTOR:
                 return  Arm_Motor.isBusy();
-            case LEFT: // left side
-                return (lower_left.isBusy() && upper_left.isBusy());
-            case RIGHT: // right side
-                return (lower_right.isBusy() && upper_right.isBusy());
-            case UPPER: // upper side
-                return (upper_left.isBusy() && upper_right.isBusy());
-            case LOWER: // lower side
-                return (lower_left.isBusy() && lower_right.isBusy());
-            case ALL: // All
+            case ALL_DRIVES: // All Drives
                 return lower_left.isBusy() && lower_right.isBusy() && upper_left.isBusy() && upper_right.isBusy();
             default:
                 return false;

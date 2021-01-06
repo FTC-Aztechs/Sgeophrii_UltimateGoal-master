@@ -97,12 +97,6 @@ public class Sgp_Autonomous extends LinearOpMode {
          * The init() method of the hardware class does all the work here
          */
         robot.init(hardwareMap);
-        Servo Wrist_1 = hardwareMap.get(Servo.class, "Wrist_1" );
-        Servo Wrist_2 = hardwareMap.get(Servo.class, "Wrist_2");
-        Servo Claw = hardwareMap.get(Servo.class, "Finger");
-        Wrist_1.setPosition(0.5);
-        Wrist_2.setPosition(0.5);
-        Claw.setPosition (0.5);
 
         //robot.Arm_Motor.setPower(0.1);
 
@@ -136,28 +130,28 @@ public class Sgp_Autonomous extends LinearOpMode {
 //        sleep(5000);
 
         // Pickup the second wobble goal
-        PickupWobble2();
+//        PickupWobble2();
 //        sleep(1000);
 
-        switch (Position) {
-            case NONE:
-                // Start from initial position, go to drop zone A,
-                // drop the wobble goal, trace back to launch zone
-                WobbleDropPositionA();
-                break;
-            case ONE:
-                WobbleDropPositionB();
-                break;
-            case FOUR:
-                WobbleDropPositionC();
-                break;
-        }
+//        switch (Position) {
+//            case NONE:
+//                // Start from initial position, go to drop zone A,
+//                // drop the wobble goal, trace back to launch zone
+//                WobbleDropPositionA();
+//                break;
+//            case ONE:
+//                WobbleDropPositionB();
+//                break;
+//            case FOUR:
+//                WobbleDropPositionC();
+//                break;
+//        }
 
         // Shoot preloaded rings
-        shootPreloadedRings();
-
-        // Navigate to stop on launch line.
-        navigateToLaunchLine();
+//        shootPreloadedRings();
+//
+//        // Navigate to stop on launch line.
+//        navigateToLaunchLine();
 
         telemetry.addData("Autonomous", "Complete");
         telemetry.update();
@@ -187,11 +181,14 @@ public class Sgp_Autonomous extends LinearOpMode {
             }
         });
 
-        return SgpDeterminationPipeline.RingPosition.ONE;
+        return SgpDeterminationPipeline.RingPosition.NONE;
     }
 
     public void WobbleDropPositionA() {
-        sgpAutoDrive(DRIVE_SPEED, 66, 66, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoDrive(DRIVE_SPEED, 66, 66, 5.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 5.0);
+        sgpAutoStrafe(DRIVE_SPEED, -24, -24, 5.0);
+        sgpAutoDrive(DRIVE_SPEED, -66, -66, 5.0);
         telemetry.addData("Status" , "Reached Position A");
         telemetry.update();
 
@@ -260,14 +257,18 @@ public class Sgp_Autonomous extends LinearOpMode {
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
+            // Reset
+            robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.RUN_USING_ENCODER);
+
             // Determine new target position, and pass to motor controller
-            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT)+ (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT)+ (int)(rightInches * COUNTS_PER_INCH);
+            newRightTarget = (int)(leftInches  * COUNTS_PER_INCH);
+            newLeftTarget  = (int)(rightInches * COUNTS_PER_INCH);
 
             robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, newLeftTarget);
-            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newLeftTarget);
-            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
             robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newLeftTarget);
 
             // Turn On RUN_TO_POSITION
             robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
@@ -276,15 +277,9 @@ public class Sgp_Autonomous extends LinearOpMode {
             runtime.reset();
             robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, Math.abs(speed));
 
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
-                    (runtime.seconds() < timeoutS) &&
-                    (robot.areMotorsBusy(SgpRobot.SgpMotors.ALL_DRIVES)) )
+                  (runtime.seconds() < timeoutS) &&
+                  (robot.areMotorsBusy(SgpRobot.SgpMotors.ALL_DRIVES)) )
             {
                 telemetry.addData("Target positions", "Left %7d : Right %7d", newLeftTarget, newRightTarget);
                 telemetry.addData("Current position", "Upper_Left %7d : Lower_Right %7d : Upper_Right %7d : Lower_Left %7d",
@@ -312,13 +307,20 @@ public class Sgp_Autonomous extends LinearOpMode {
         robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.RUN_USING_ENCODER);
 
         if (opModeIsActive()) {
-            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT) + (int) (leftInches * COUNTS_PER_INCH);
-            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT) + (int) (rightInches * COUNTS_PER_INCH);
+            newLeftTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_LEFT) + (int) (leftInches * COUNTS_PER_INCH);
+            newRightTarget = robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_RIGHT) + (int) (rightInches * COUNTS_PER_INCH);
 
-            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, newLeftTarget);
-            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, newLeftTarget);
+                 //    Strafe Right ->      Strafe Left <-
+                 //    ^^  O-----O vv       vv  O-----O ^^
+                 //           |                    |
+                 //           |                    |
+                 //    vv  O-----O ^^       ^^  O-----O vv
+
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newLeftTarget);
             robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_RIGHT, newRightTarget);
-            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_LEFT, newRightTarget);
+
+            robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, -newRightTarget);
+            robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, -newLeftTarget);
 
             robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
 

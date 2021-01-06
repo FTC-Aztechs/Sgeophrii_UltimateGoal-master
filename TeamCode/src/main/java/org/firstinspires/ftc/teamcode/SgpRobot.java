@@ -34,6 +34,7 @@ import android.provider.BlockedNumberContract;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
@@ -141,17 +142,25 @@ public class SgpRobot
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        upper_left.setDirection(DcMotor.Direction.FORWARD);
-        upper_right.setDirection(DcMotor.Direction.REVERSE);
-        lower_left.setDirection(DcMotor.Direction.FORWARD);
-        lower_right.setDirection(DcMotor.Direction.REVERSE);
+        upper_left.setDirection(DcMotor.Direction.FORWARD);  //-
+        upper_right.setDirection(DcMotor.Direction.REVERSE); //+
+
+        //lower_left.setDirection(DcMotor.Direction.REVERSE); //-
+        lower_left.setDirection(DcMotor.Direction.FORWARD); //- used to be
+
+        lower_right.setDirection(DcMotor.Direction.REVERSE); //+ used to be
+        //lower_right.setDirection(DcMotor.Direction.FORWARD); //+
+
         Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
-        Batman_Belt.setDirection(DcMotor.Direction.REVERSE);
+        Batman_Belt.setDirection(DcMotor.Direction.FORWARD);
         Bravo_6.setDirection(DcMotor.Direction.FORWARD);
         Wrist_1.setDirection(Servo.Direction.FORWARD );
         Wrist_2.setDirection(Servo.Direction.FORWARD );
         Finger.setDirection(Servo.Direction.FORWARD );
 
+        Wrist_1.setPosition(0.5);
+        Wrist_2.setPosition(0.5);
+        Finger.setPosition (0.5);
     }
 
     public void initImuGyro()

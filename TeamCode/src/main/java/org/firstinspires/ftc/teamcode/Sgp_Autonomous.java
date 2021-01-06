@@ -48,31 +48,8 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 /**
- * This file illustrates the concept of driving a path based on encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
- * The code is structured as a LinearOpMode
- *
- * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: PushbotAutoDriveByTime;
- *
- *  This code ALSO requires that the drive Motors have been configured such that a positive
- *  power command moves them forwards, and causes the encoders to count UP.
- *
- *   The desired path in this example is:
- *   - Drive forward for 48 inches
- *   - Spin right for 12 Inches
- *   - Drive Backwards for 24 inches
- *   - Stop and close the claw.
- *
- *  The code is written using a method called: encoderDrive(speed, leftInches, rightInches, timeoutS)
- *  that performs the actual movement.
- *  This methods assumes that each movement is relative to the last stopping place.
- *  There are other ways to perform encoder based moves, but this method is probably the simplest.
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
+ * ToDo: Lavanya/Atiksh - please document what this class does
+ **/
 
 @Autonomous(name="Sgp_Autonomous", group="Autonomous Mode")
 public class Sgp_Autonomous extends LinearOpMode {
@@ -127,31 +104,29 @@ public class Sgp_Autonomous extends LinearOpMode {
                 WobbleDropPositionC();
                 break;
         }
-//        sleep(5000);
 
         // Pickup the second wobble goal
-//        PickupWobble2();
-//        sleep(1000);
+        PickupWobble2();
 
-//        switch (Position) {
-//            case NONE:
-//                // Start from initial position, go to drop zone A,
-//                // drop the wobble goal, trace back to launch zone
-//                WobbleDropPositionA();
-//                break;
-//            case ONE:
-//                WobbleDropPositionB();
-//                break;
-//            case FOUR:
-//                WobbleDropPositionC();
-//                break;
-//        }
+        switch (Position) {
+            case NONE:
+                // Start from initial position, go to drop zone A,
+                // drop the wobble goal, trace back to launch zone
+                WobbleDropPositionA();
+                break;
+            case ONE:
+                WobbleDropPositionB();
+                break;
+            case FOUR:
+                WobbleDropPositionC();
+                break;
+        }
 
         // Shoot preloaded rings
-//        shootPreloadedRings();
-//
-//        // Navigate to stop on launch line.
-//        navigateToLaunchLine();
+        shootPreloadedRings();
+
+        // Navigate to stop on launch line.
+        navigateToLaunchLine();
 
         telemetry.addData("Autonomous", "Complete");
         telemetry.update();
@@ -189,6 +164,9 @@ public class Sgp_Autonomous extends LinearOpMode {
         sgpAutoStrafe(DRIVE_SPEED, 24, 24, 5.0);
         sgpAutoStrafe(DRIVE_SPEED, -24, -24, 5.0);
         sgpAutoDrive(DRIVE_SPEED, -66, -66, 5.0);
+
+        dropWobbleOnField();
+
         telemetry.addData("Status" , "Reached Position A");
         telemetry.update();
 
@@ -200,6 +178,8 @@ public class Sgp_Autonomous extends LinearOpMode {
         sgpAutoDrive(DRIVE_SPEED, 90, 90, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         sgpAutoStrafe(DRIVE_SPEED, 24, 24, 4.0);
 
+        dropWobbleOnField();
+
         telemetry.addData("Status" , "Reached Position B");
         telemetry.update();
 
@@ -209,6 +189,16 @@ public class Sgp_Autonomous extends LinearOpMode {
     public void WobbleDropPositionC() {
         sgpAutoDrive(DRIVE_SPEED, 112, 112, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
         telemetry.addData("Status" , "Reached Position C");
+        telemetry.update();
+
+        dropWobbleOnField();
+
+        return;
+    }
+
+    public void dropWobbleOnField()
+    {
+        telemetry.addData("Status", "Dropping Wobble goal on field")
         telemetry.update();
 
         return;
@@ -345,6 +335,11 @@ public class Sgp_Autonomous extends LinearOpMode {
         }
     }
 
+    /**
+     * ToDo: 1. Avi/Dhruv - please document what this class does
+     *       2. Investigate how this class can be moved into a new file
+     *      
+    */
     public static class SgpDeterminationPipeline extends OpenCvPipeline
     {
         /*
@@ -451,38 +446,3 @@ public class Sgp_Autonomous extends LinearOpMode {
 }
 
 
-// Test code
-// Step through each leg of the path,
-// Note: Reverse movement is obtained by setting a negative distance (not speed)
-//        encoderDrive(DRIVE_SPEED,  12,  12, 4.0);  // S1: Forward 12 Inches with 5 Sec timeout
-//encoderDrive(TURN_SPEED, 9.5, -9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//    encoderDrive(TURN_SPEED, -9.5, 9.5, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//    sleep(1000);     // pause for servos to move
-//        telemetry.addData("Turn 9.5", "Complete");
-//                telemetry.update();
-//
-//                encoderDrive(TURN_SPEED, 19, -19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                encoderDrive(TURN_SPEED, -19, 19, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                sleep(1000);     // pause for servos to move
-//                telemetry.addData("Turn 19", "Complete");
-//                telemetry.update();
-//
-//                encoderDrive(TURN_SPEED, 4, -4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                encoderDrive(TURN_SPEED, -4, 4, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                sleep(1000);     // pause for servos to move
-//                telemetry.addData("Turn 4", "Complete");
-//                telemetry.update();
-//
-//                encoderDrive(TURN_SPEED, 11.87, -11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                encoderDrive(TURN_SPEED, -11.87, 11.87, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-//                sleep(1000);     // pause for servos to move
-//                telemetry.addData("Turn 11.87", "Complete");
-//                telemetry.update();
-//
-////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-////        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-////        encoderDrive(TURN_SPEED,   35, -35, 4.0);  // S2: Turn Right 35 Inches (-90 degrees) with 4 Sec timeout
-////        encoderDrive(DRIVE_SPEED, 12, 12, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//
-//                sleep(1000);     // pause for servos to move

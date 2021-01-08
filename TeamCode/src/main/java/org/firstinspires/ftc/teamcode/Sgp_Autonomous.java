@@ -65,6 +65,8 @@ public class Sgp_Autonomous extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.5;
+    OpenCvInternalCamera    phoneCam;
+    SgpDeterminationPipeline pipeline;
 
     @Override
     public void runOpMode() {
@@ -84,12 +86,17 @@ public class Sgp_Autonomous extends LinearOpMode {
         robot.setRunMode(SgpRobot.SgpMotors.ALL, DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Wait for the game to start (driver presses PLAY)
+
+        acquireCamera();
+
         waitForStart();
 
-        SgpDeterminationPipeline.RingPosition Position = getWobbleDropPosition();
-        telemetry.addData("Wobble Position: ", Position );
+        SgpDeterminationPipeline.RingPosition Position = pipeline.position;
+        telemetry.addData("Analysis", pipeline.getAnalysis());
+        telemetry.addData("Position", Position);
         telemetry.update();
-//        sleep(5000);
+
+        runtime.reset();
 
         switch (Position) {
             case NONE:
@@ -105,22 +112,22 @@ public class Sgp_Autonomous extends LinearOpMode {
                 break;
         }
 
-        // Pickup the second wobble goal
-        PickupWobble2();
-
-        switch (Position) {
-            case NONE:
-                // Start from initial position, go to drop zone A,
-                // drop the wobble goal, trace back to launch zone
-                WobbleDropPositionA();
-                break;
-            case ONE:
-                WobbleDropPositionB();
-                break;
-            case FOUR:
-                WobbleDropPositionC();
-                break;
-        }
+//        // Pickup the second wobble goal
+//        PickupWobble2();
+//
+//        switch (Position) {
+//            case NONE:
+//                // Start from initial position, go to drop zone A,
+//                // drop the wobble goal, trace back to launch zone
+//                WobbleDropPositionA();
+//                break;
+//            case ONE:
+//                WobbleDropPositionB();
+//                break;
+//            case FOUR:
+//                WobbleDropPositionC();
+//                break;
+//        }
 
         // Shoot preloaded rings
         shootPreloadedRings();
@@ -132,53 +139,36 @@ public class Sgp_Autonomous extends LinearOpMode {
         telemetry.update();
     }
 
-    public SgpDeterminationPipeline.RingPosition getWobbleDropPosition()
+
+
+    public void WobbleDropPositionA()
     {
-        final OpenCvInternalCamera phoneCam;
-        SgpDeterminationPipeline pipeline;
+        if(opModeIsActive()) {
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
-        pipeline = new SgpDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
+            // Go to Position A
+            sgpAutoDrive(DRIVE_SPEED, -80, -80, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            sgpAutoStrafe(DRIVE_SPEED, -24, -24, 30.0);
 
-        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+            dropWobbleOnField();
 
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-        });
+            // Return home
+            sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 80, 80, 30.0);
 
-        return SgpDeterminationPipeline.RingPosition.NONE;
-    }
-
-    public void WobbleDropPositionA() {
-        sgpAutoDrive(DRIVE_SPEED, 66, 66, 5.0);  // S3: Forward 13 Inches with 4 Sec timeout
-        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 5.0);
-        sgpAutoStrafe(DRIVE_SPEED, -24, -24, 5.0);
-        sgpAutoDrive(DRIVE_SPEED, -66, -66, 5.0);
-
-        dropWobbleOnField();
-
-        telemetry.addData("Status" , "Reached Position A");
-        telemetry.update();
-
+            telemetry.addData("Status", "Reached Position A");
+            telemetry.update();
+        }
         return;
     }
 
     public void WobbleDropPositionB() {
-
-        sgpAutoDrive(DRIVE_SPEED, 90, 90, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
-        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 4.0);
+        sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
+        sgpAutoDrive(DRIVE_SPEED, -96, -96, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
         dropWobbleOnField();
+
+        sgpAutoDrive(DRIVE_SPEED, 96, 96, 30.0);
+        sgpAutoStrafe(DRIVE_SPEED, -12, -12, 30.0);
 
         telemetry.addData("Status" , "Reached Position B");
         telemetry.update();
@@ -187,19 +177,33 @@ public class Sgp_Autonomous extends LinearOpMode {
     }
 
     public void WobbleDropPositionC() {
-        sgpAutoDrive(DRIVE_SPEED, 112, 112, 4.0);  // S3: Forward 13 Inches with 4 Sec timeout
+//        sgpAutoDrive(DRIVE_SPEED, -60, -60, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+//        sgpAutoDrive(DRIVE_SPEED, 40, -40, 30.0);
+//        sgpAutoDrive(DRIVE_SPEED, -40, 40, 30.0);
+//        sgpAutoDrive(DRIVE_SPEED, 60, 60, 30.0);
+
+        sgpAutoDrive(DRIVE_SPEED, -123, -123, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoStrafe(DRIVE_SPEED, -24, -24, 30.0);
+
+        dropWobbleOnField();
+
+        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
+        sgpAutoDrive(DRIVE_SPEED, 123, 123, 30.0);
+
         telemetry.addData("Status" , "Reached Position C");
         telemetry.update();
 
-        dropWobbleOnField();
 
         return;
     }
 
     public void dropWobbleOnField()
     {
-        telemetry.addData("Status", "Dropping Wobble goal on field")
+        robot.Finger.setPosition (1);
+        telemetry.addData("Status", "Dropping Wobble goal on field");
         telemetry.update();
+
+
 
         return;
     }
@@ -214,7 +218,7 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     public void shootPreloadedRings()
     {
-        telemetry.addData("Status" , "Picked up Wobble 2");
+        telemetry.addData("Status" , "Shooting Rings");
         telemetry.update();
 
         return;
@@ -335,10 +339,35 @@ public class Sgp_Autonomous extends LinearOpMode {
         }
     }
 
+
+    public void acquireCamera()
+    {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                       int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
+        pipeline = new SgpDeterminationPipeline();
+        phoneCam.setPipeline(pipeline);
+
+        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+        // out when the RC activity is in portrait. We do our actual image processing assuming
+        // landscape orientation, though.
+        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+
+        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+            }
+        });
+
+       return ;
+    }
+
     /**
      * ToDo: 1. Avi/Dhruv - please document what this class does
      *       2. Investigate how this class can be moved into a new file
-     *      
+     *
     */
     public static class SgpDeterminationPipeline extends OpenCvPipeline
     {
@@ -361,13 +390,14 @@ public class Sgp_Autonomous extends LinearOpMode {
         /*
          * The core values which define the location and size of the sample regions
          */
-        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(181,98);
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(120,80);
+
 
         static final int REGION_WIDTH = 35;
         static final int REGION_HEIGHT = 25;
 
-        final int FOUR_RING_THRESHOLD = 150;
-        final int ONE_RING_THRESHOLD = 135;
+        final int FOUR_RING_THRESHOLD = 155;
+        final int ONE_RING_THRESHOLD = 140;
 
         Point region1_pointA = new Point(
                 REGION1_TOPLEFT_ANCHOR_POINT.x,

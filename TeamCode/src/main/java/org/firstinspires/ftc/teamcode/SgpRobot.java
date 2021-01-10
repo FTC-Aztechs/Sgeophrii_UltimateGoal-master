@@ -147,7 +147,7 @@ public class SgpRobot
         Finger.setDirection(Servo.Direction.FORWARD );
 
         Wrist_1.setPosition(0.5);
-        Wrist_2.setPosition(0);
+        Wrist_2.setPosition(0.5);
         Finger.setPosition (0.0);
     }
 

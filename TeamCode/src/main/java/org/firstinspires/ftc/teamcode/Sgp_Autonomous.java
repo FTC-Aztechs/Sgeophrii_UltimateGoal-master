@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.opencv.core.Core;
@@ -48,7 +47,9 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 /**
- * ToDo: Lavanya/Atiksh - please document what this class does
+ * ToDo: [Lavanya/Atiksh]
+ *      1. Document what this class does
+ *      2. Add a if(opModeIsActive()) check to function implementations *
  **/
 
 @Autonomous(name="Sgp_Autonomous", group="Autonomous Mode")
@@ -89,9 +90,14 @@ public class Sgp_Autonomous extends LinearOpMode {
 
         acquireCamera();
 
+        SgpDeterminationPipeline.RingPosition Position = pipeline.position;
+        telemetry.addData("Analysis", pipeline.getAnalysis());
+        telemetry.addData("Position", Position);
+        telemetry.update();
+
         waitForStart();
 
-        SgpDeterminationPipeline.RingPosition Position = pipeline.position;
+        Position = pipeline.position;
         telemetry.addData("Analysis", pipeline.getAnalysis());
         telemetry.addData("Position", Position);
         telemetry.update();
@@ -130,7 +136,7 @@ public class Sgp_Autonomous extends LinearOpMode {
 //        }
 
         // Shoot preloaded rings
-        shootPreloadedRings();
+        sgpAutoShoot();
 
         // Navigate to stop on launch line.
         navigateToLaunchLine();
@@ -146,14 +152,14 @@ public class Sgp_Autonomous extends LinearOpMode {
         if(opModeIsActive()) {
 
             // Go to Position A
-            sgpAutoDrive(DRIVE_SPEED, -80, -80, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-            sgpAutoStrafe(DRIVE_SPEED, -24, -24, 30.0);
+            sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, -74, -74, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
+            robot.Wrist_2.setPosition(0.0);
             dropWobbleOnField();
 
             // Return home
-            sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 80, 80, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 6, 6, 30.0);
 
             telemetry.addData("Status", "Reached Position A");
             telemetry.update();
@@ -163,12 +169,12 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     public void WobbleDropPositionB() {
         sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
-        sgpAutoDrive(DRIVE_SPEED, -96, -96, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        sgpAutoDrive(DRIVE_SPEED, -92, -92, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
+        robot.Wrist_2.setPosition(0.0);
         dropWobbleOnField();
 
-        sgpAutoDrive(DRIVE_SPEED, 96, 96, 30.0);
-        sgpAutoStrafe(DRIVE_SPEED, -12, -12, 30.0);
+        sgpAutoDrive(DRIVE_SPEED, 22, 22, 30.0);
 
         telemetry.addData("Status" , "Reached Position B");
         telemetry.update();
@@ -182,13 +188,13 @@ public class Sgp_Autonomous extends LinearOpMode {
 //        sgpAutoDrive(DRIVE_SPEED, -40, 40, 30.0);
 //        sgpAutoDrive(DRIVE_SPEED, 60, 60, 30.0);
 
-        sgpAutoDrive(DRIVE_SPEED, -123, -123, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-        sgpAutoStrafe(DRIVE_SPEED, -24, -24, 30.0);
+        sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
+        sgpAutoDrive(DRIVE_SPEED, -115, -115, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
+        robot.Wrist_2.setPosition(0.0);
         dropWobbleOnField();
 
-        sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
-        sgpAutoDrive(DRIVE_SPEED, 123, 123, 30.0);
+        sgpAutoDrive(DRIVE_SPEED, 42, 42, 30.0);
 
         telemetry.addData("Status" , "Reached Position C");
         telemetry.update();
@@ -203,8 +209,6 @@ public class Sgp_Autonomous extends LinearOpMode {
         telemetry.addData("Status", "Dropping Wobble goal on field");
         telemetry.update();
 
-
-
         return;
     }
 
@@ -216,7 +220,7 @@ public class Sgp_Autonomous extends LinearOpMode {
         return;
     }
 
-    public void shootPreloadedRings()
+    public void sgpAutoShoot()
     {
         telemetry.addData("Status" , "Shooting Rings");
         telemetry.update();
@@ -396,8 +400,8 @@ public class Sgp_Autonomous extends LinearOpMode {
         static final int REGION_WIDTH = 35;
         static final int REGION_HEIGHT = 25;
 
-        final int FOUR_RING_THRESHOLD = 155;
-        final int ONE_RING_THRESHOLD = 140;
+        final int FOUR_RING_THRESHOLD = 165;
+        final int ONE_RING_THRESHOLD = 150;
 
         Point region1_pointA = new Point(
                 REGION1_TOPLEFT_ANCHOR_POINT.x,

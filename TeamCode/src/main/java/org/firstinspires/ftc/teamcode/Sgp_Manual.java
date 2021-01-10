@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -81,9 +80,9 @@ public class Sgp_Manual extends LinearOpMode
 
         while(opModeIsActive())
         {
-            driveSgeophrii();
-            armSgeophrii();
-            shootSgeophrii();
+            sgpManualDrive();
+            sgpManualArm();
+            sgpManualShoot();
         }
     }
 
@@ -99,7 +98,7 @@ public class Sgp_Manual extends LinearOpMode
         return;
     }
 
-    public void driveSgeophrii()
+    public void sgpManualDrive()
     {
         if( gamepad1.dpad_left && speedAdjust >= 1 ) {
             speedAdjust -= 1;
@@ -122,7 +121,7 @@ public class Sgp_Manual extends LinearOpMode
         return;
     }
 
-    public void armSgeophrii()
+    public void sgpManualArm()
     {
         Servo activeServo = null;
         rampUp = gamepad2.right_trigger == 0f;
@@ -174,7 +173,7 @@ public class Sgp_Manual extends LinearOpMode
         return;
     }
 
-    public void shootSgeophrii()
+    public void sgpManualShoot()
     {
         return;
     }

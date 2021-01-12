@@ -102,13 +102,13 @@ public class Sgp_Manual extends LinearOpMode
     {
         if( gamepad1.dpad_left && speedAdjust >= 1 ) {
             speedAdjust -= 1;
-            telemetry.addData("Current speed: ", "%d", speedAdjust);
+            telemetry.addData("Current speed: ", "%f", speedAdjust);
             telemetry.update();
         }
 
         if(gamepad1.dpad_right && speedAdjust <= 7) {
             speedAdjust += 1;
-            telemetry.addData("Current speed: ", "%d", speedAdjust);
+            telemetry.addData("Current speed: ", "%f", speedAdjust);
             telemetry.update();
         }
 
@@ -173,8 +173,22 @@ public class Sgp_Manual extends LinearOpMode
         return;
     }
 
-    public void sgpManualShoot()
-    {
+    public void sgpManualShoot() {
+        if (gamepad2.dpad_left && speedAdjust >= 1) {
+            speedAdjust -= 1;
+            telemetry.addData("Current speed: ", "%f", speedAdjust);
+            telemetry.update();
+        }
+
+        if (gamepad2.dpad_right && speedAdjust <= 7) {
+            speedAdjust += 1;
+            telemetry.addData("Current speed: ", "%f", speedAdjust);
+            telemetry.update();
+        }
+
+        robot.Batman_Belt.setPower((gamepad2.right_stick_y) * (-speedAdjust / 10));
+        robot.Bravo_6.setPower((gamepad2.left_stick_y) * (-speedAdjust / 10));
+
         return;
     }
 }

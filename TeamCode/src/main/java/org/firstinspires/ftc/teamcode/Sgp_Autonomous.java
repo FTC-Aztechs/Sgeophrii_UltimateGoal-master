@@ -118,22 +118,22 @@ public class Sgp_Autonomous extends LinearOpMode {
                 break;
         }
 
-//        // Pickup the second wobble goal
-//        PickupWobble2();
-//
-//        switch (Position) {
-//            case NONE:
-//                // Start from initial position, go to drop zone A,
-//                // drop the wobble goal, trace back to launch zone
-//                WobbleDropPositionA();
-//                break;
-//            case ONE:
-//                WobbleDropPositionB();
-//                break;
-//            case FOUR:
-//                WobbleDropPositionC();
-//                break;
-//        }
+        // Pickup the second wobble goal
+        PickupWobble2();
+
+        switch (Position) {
+            case NONE:
+                // Start from initial position, go to drop zone A,
+                // drop the wobble goal, trace back to launch zone
+                WobbleDropPositionA();
+                break;
+            case ONE:
+                WobbleDropPositionB();
+                break;
+            case FOUR:
+                WobbleDropPositionC();
+                break;
+        }
 
         // Shoot preloaded rings
         sgpAutoShoot();
@@ -168,70 +168,78 @@ public class Sgp_Autonomous extends LinearOpMode {
     }
 
     public void WobbleDropPositionB() {
-        sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
-        sgpAutoDrive(DRIVE_SPEED, -92, -92, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+        if(opModeIsActive()) {
+            sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, -92, -92, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
-        robot.Wrist_2.setPosition(0.0);
-        dropWobbleOnField();
+            robot.Wrist_2.setPosition(0.0);
+            dropWobbleOnField();
 
-        sgpAutoDrive(DRIVE_SPEED, 22, 22, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 22, 22, 30.0);
 
-        telemetry.addData("Status" , "Reached Position B");
-        telemetry.update();
+            telemetry.addData("Status", "Reached Position B");
+            telemetry.update();
+        }
 
         return;
     }
 
     public void WobbleDropPositionC() {
-//        sgpAutoDrive(DRIVE_SPEED, -60, -60, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//        sgpAutoDrive(DRIVE_SPEED, 40, -40, 30.0);
-//        sgpAutoDrive(DRIVE_SPEED, -40, 40, 30.0);
-//        sgpAutoDrive(DRIVE_SPEED, 60, 60, 30.0);
+        if(opModeIsActive()) {
+            sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, -115, -115, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
-        sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
-        sgpAutoDrive(DRIVE_SPEED, -115, -115, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            robot.Wrist_2.setPosition(0.0);
+            dropWobbleOnField();
 
-        robot.Wrist_2.setPosition(0.0);
-        dropWobbleOnField();
+            sgpAutoDrive(DRIVE_SPEED, 42, 42, 30.0);
 
-        sgpAutoDrive(DRIVE_SPEED, 42, 42, 30.0);
-
-        telemetry.addData("Status" , "Reached Position C");
-        telemetry.update();
-
+            telemetry.addData("Status", "Reached Position C");
+            telemetry.update();
+        }
 
         return;
     }
 
     public void dropWobbleOnField()
     {
-        robot.Finger.setPosition (1);
-        telemetry.addData("Status", "Dropping Wobble goal on field");
-        telemetry.update();
+        if(opModeIsActive()) {
+            robot.Finger.setPosition(1);
+            telemetry.addData("Status", "Dropping Wobble goal on field");
+            telemetry.update();
+        }
 
         return;
     }
 
     public void PickupWobble2()
     {
-        telemetry.addData("Status" , "Picked up Wobble 2");
-        telemetry.update();
+        if(opModeIsActive()) {
+            telemetry.addData("Status" , "Picked up Wobble 2");
+            telemetry.update();
+        }
 
         return;
     }
 
     public void sgpAutoShoot()
     {
-        telemetry.addData("Status" , "Shooting Rings");
-        telemetry.update();
+
+        if(opModeIsActive()) {
+            telemetry.addData("Status", "Shooting Rings");
+            telemetry.update();
+        }
 
         return;
     }
 
     public void navigateToLaunchLine()
     {
-        telemetry.addData("Status" , "Navigation to launch line completed");
-        telemetry.update();
+        if(opModeIsActive()) {
+
+            telemetry.addData("Status", "Navigation to launch line completed");
+            telemetry.update();
+        }
 
         return;
     }
@@ -320,9 +328,9 @@ public class Sgp_Autonomous extends LinearOpMode {
             robot.setTargetPosition(SgpRobot.SgpMotors.LOWER_RIGHT, -newRightTarget);
             robot.setTargetPosition(SgpRobot.SgpMotors.UPPER_LEFT, -newLeftTarget);
 
-            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
 
-            runtime.reset();
+            runtime.reset();            robot.setRunMode(SgpRobot.SgpMotors.ALL_DRIVES, DcMotor.RunMode.RUN_TO_POSITION);
+
             robot.setPower(SgpRobot.SgpMotors.ALL_DRIVES, Math.abs(speed));
 
             while (opModeIsActive()

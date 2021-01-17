@@ -116,9 +116,9 @@ public class Sgp_Manual extends LinearOpMode
 
         // Set Motor power
         robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
-        robot.lower_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+        robot.lower_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
         robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
-        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+        robot.upper_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
 
         //gamepad1.left_stick_y: Forward/Backward
         //gamepad1.left_stick_x: Turn left / Right

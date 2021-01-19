@@ -108,23 +108,30 @@ public class Sgp_Manual extends LinearOpMode
             telemetry.update();
         }
 
-        // TODO : Fix the "Strafe" portion of this code.
+        // TO DO : Fix the "Strafe" portion of this code.
         //        What we learnt today is that the lef_stick_x seems to make things go bad.
         // left_stick_y = 1.0
         // left_stick_x = -0.5
         // right_stick_x = 0
 
-        // Set Motor power
+        // Set Motor power Original
+//        robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+//        robot.lower_right.setPower((gamepad1.left_stick_y  gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+//        robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+//        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+
+        // Set Motor power Lavanya
         robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
-        robot.lower_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+        robot.lower_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
         robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
-        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+        robot.upper_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+
 
         //gamepad1.left_stick_y: Forward/Backward
         //gamepad1.left_stick_x: Turn left / Right
         //gamepad1.left_stick_x + LT: Strafe left / right
 
-        return;
+          return;
     }
 
     public void sgpManualArm()

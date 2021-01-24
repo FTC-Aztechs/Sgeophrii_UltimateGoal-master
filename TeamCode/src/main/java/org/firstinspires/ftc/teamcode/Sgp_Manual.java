@@ -56,6 +56,8 @@ public class Sgp_Manual extends LinearOpMode
     private double speedAdjust = 7;
     private ElapsedTime runtime = new ElapsedTime();
     private double position = (RANGE[1] - RANGE[0]) / 2;
+    private double Wrist_pos = (RANGE[1] - RANGE[0]) / 2;
+    private double Finger_pos = RANGE[0];
     double Arm_Power = 0;
     double maxArm_Power=  0.5;
 
@@ -86,7 +88,8 @@ public class Sgp_Manual extends LinearOpMode
         // set Arm positions
         position = RANGE[1] - RANGE[0] / 2;
         robot.Wrist_1.setPosition(position);
-        robot.Wrist_2.setPosition(position);
+        robot.Wrist_2.setPosition(Wrist_pos);
+        robot.Finger.setPosition(Finger_pos);
 
         telemetry.addData("Status:", "Sgeophrii initialized");
         telemetry.update();
@@ -110,9 +113,6 @@ public class Sgp_Manual extends LinearOpMode
 
         // TO DO : Fix the "Strafe" portion of this code.
         //        What we learnt today is that the lef_stick_x seems to make things go bad.
-        // left_stick_y = 1.0
-        // left_stick_x = -0.5
-        // right_stick_x = 0
 
         // Set Motor power Original
 //        robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
@@ -121,15 +121,11 @@ public class Sgp_Manual extends LinearOpMode
 //        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
 
         // Set Motor power Lavanya
+        // See Mecanum_Drive spreadsheet
         robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
         robot.lower_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
         robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
         robot.upper_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
-
-
-        //gamepad1.left_stick_y: Forward/Backward
-        //gamepad1.left_stick_x: Turn left / Right
-        //gamepad1.left_stick_x + LT: Strafe left / right
 
           return;
     }
@@ -142,9 +138,35 @@ public class Sgp_Manual extends LinearOpMode
         if( gamepad2.x)
             activeServo = robot.Wrist_1;
         else if (gamepad2.y)
-            activeServo = robot.Wrist_2;
-        else if( gamepad2.b)
-            activeServo = robot.Finger;
+        {
+            if(rampUp) {
+                Wrist_pos += INCREMENT;
+                if(Wrist_pos >= 0.5)
+                    Wrist_pos = 0.5;
+            }
+            else
+            {
+                Wrist_pos -= INCREMENT;
+                if(Wrist_pos <= RANGE[0])
+                    Wrist_pos = RANGE[0];
+            }
+            robot.Wrist_2.setPosition(Wrist_pos);
+        }
+            //activeServo = robot.Wrist_2;
+        else if( gamepad2.b) {
+           if (rampUp) {
+                Finger_pos += INCREMENT;
+                if (Finger_pos >= RANGE[1])
+                    Finger_pos = RANGE[1];
+            } else {
+               Finger_pos -= INCREMENT;
+                if (Finger_pos <= RANGE[0])
+                    Finger_pos = RANGE[0];
+            }
+            robot.Finger.setPosition(Finger_pos);
+        }
+
+            //activeServo = robot.Finger;
         else if (gamepad2.a)
         {
             initSgeophrii();
@@ -155,44 +177,54 @@ public class Sgp_Manual extends LinearOpMode
             activeServo = null;
         }
 
-        if( rampUp) {
-            position += INCREMENT;
-            if (position >= RANGE[1]) {
-                position = RANGE[1];
-            }
-        }
-        else {
-            position -= INCREMENT;
-            if (position <= RANGE[0]) {
-                position = RANGE[0];
-            }
-        }
+//        if( activeServo != null && rampUp) {
+//            position += INCREMENT;
+//            if (position >= RANGE[1]) {
+//                position = RANGE[1];
+//            }
+//        }
+//        else if(activeServo != null ) {
+//            position -= INCREMENT;
+//            if (position <= RANGE[0]) {
+//                position = RANGE[0];
+//            }
+//        }
 
         String activeServoName;
         double servoPosition=0.0f;
 
-        if(activeServo !=null) {
-            activeServo.setPosition(position);
-            int servoPort = activeServo.getPortNumber();
-            servoPosition = activeServo.getPosition();
-            if (servoPort == 0)
-                activeServoName = "Wrist_1";
-            else if (servoPort == 1)
-                activeServoName = "Wrist_2";
-            else
-                activeServoName = "Finger";
-        }
-        else {
-            activeServoName = "none";
-        }
-        //set the arm motor's power
+//        if(activeServo !=null) {
+//            if (rampUp) {
+//                position += INCREMENT;
+//                if (position >= RANGE[1])
+//                    position = RANGE[1];
+//            } else {
+//                position -= INCREMENT;
+//                if(position <= RANGE[0])
+//                    position = RANGE[0];
+//            }
+//
+//            activeServo.setPosition(position);
+//            int servoPort = activeServo.getPortNumber();
+//            servoPosition = activeServo.getPosition();
+//            if (servoPort == 0)
+//                activeServoName = "Wrist_1";
+//            else if (servoPort == 1)
+//                activeServoName = "Wrist_2";
+//            else
+//                activeServoName = "Finger";
+//        }
+//        else {
+//            activeServoName = "none";
+//        }
 
+        //set the arm motor's power
         Arm_Power = gamepad2.right_stick_y * maxArm_Power;
         robot.Arm_Motor.setPower(Arm_Power);
 
-        telemetry.addData("Active Servo: ", activeServoName);
-        telemetry.addData("Active Servo set position", position);
-        telemetry.addData("Servo Position: ", servoPosition);
+//        telemetry.addData("Active Servo: ", activeServoName);
+//        telemetry.addData("Active Servo set position", position);
+//        telemetry.addData("Servo Position: ", servoPosition);
         telemetry.addData("Arm Motor Power", Arm_Power);
         telemetry.update();
 

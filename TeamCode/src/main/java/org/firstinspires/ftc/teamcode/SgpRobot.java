@@ -29,24 +29,15 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.provider.BlockedNumberContract;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.Locale;
@@ -77,7 +68,7 @@ public class SgpRobot
     public DcMotor Arm_Motor = null;
     public DcMotor Batman_Belt = null;
     public DcMotor Bravo_6 = null;
-    public Servo Wrist_1 = null;
+    public Servo Shooter_Servo = null;
     public Servo Wrist_2 = null;
     public Servo Finger = null;
     public ServoController FingerController = null;
@@ -88,7 +79,7 @@ public class SgpRobot
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
-
+    double Pusher_Pos = 0;
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
@@ -111,7 +102,7 @@ public class SgpRobot
         Arm_Motor = hwMap.get(DcMotor.class, "Arm_Motor");
         Batman_Belt = hwMap.get(DcMotor.class, "Batman_Belt");
         Bravo_6 = hwMap.get(DcMotor.class, "Bravo_6");
-        Wrist_1 = hwMap.get(Servo.class, "Wrist_1");
+        Shooter_Servo = hwMap.get(Servo.class, "Wrist_1");
         Wrist_2 = hwMap.get(Servo.class, "Wrist_2");
         Finger = hwMap.get(Servo.class, "Finger");
 
@@ -142,14 +133,14 @@ public class SgpRobot
         Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
         Batman_Belt.setDirection(DcMotor.Direction.FORWARD);
         Bravo_6.setDirection(DcMotor.Direction.FORWARD);
-        Wrist_1.setDirection(Servo.Direction.FORWARD );
+        Shooter_Servo.setDirection(Servo.Direction.FORWARD );
         Wrist_2.setDirection(Servo.Direction.FORWARD );
         Finger.setDirection(Servo.Direction.FORWARD );
 
-        Wrist_1.setPosition(0.5);
+        //Shooter_Servo.setPosition(0);
         Wrist_2.setPosition(0.5);
         Finger.setPosition (0.0);
-    }
+        Pusher_Pos = Shooter_Servo.getPosition();    }
 
     public void initImuGyro()
     {

@@ -53,14 +53,16 @@ public class Sgp_Manual extends LinearOpMode
     static final double INCREMENT = 0.25;
 
     private boolean rampUp = true;
-    private double speedAdjust = 7;
+    private double speedAdjust = 10;
     private ElapsedTime runtime = new ElapsedTime();
     private double position = (RANGE[1] - RANGE[0]) / 2;
     private double Wrist_pos = (RANGE[1] - RANGE[0]) / 2;
     private double Finger_pos = RANGE[0];
     double Arm_Power = 0;
     double maxArm_Power=  0.5;
-
+    double shooter_power = 0.1;
+    double Pusher_Pos = 0;
+    boolean shooterOn = false;
     @Override
     public void runOpMode() {
 
@@ -76,6 +78,8 @@ public class Sgp_Manual extends LinearOpMode
 
         initSgeophrii();
 
+        telemetry.setAutoClear(false);
+
         while(opModeIsActive())
         {
             sgpManualDrive();
@@ -87,10 +91,12 @@ public class Sgp_Manual extends LinearOpMode
     public void initSgeophrii() {
         // set Arm positions
         position = RANGE[1] - RANGE[0] / 2;
-        robot.Wrist_1.setPosition(position);
+       // robot.Shooter_Servo.setPosition(position);
+        Pusher_Pos = robot.Shooter_Servo.getPosition();
         robot.Wrist_2.setPosition(Wrist_pos);
         robot.Finger.setPosition(Finger_pos);
 
+        telemetry.addData("Pusher Position", Pusher_Pos);
         telemetry.addData("Status:", "Sgeophrii initialized");
         telemetry.update();
 
@@ -120,14 +126,20 @@ public class Sgp_Manual extends LinearOpMode
 //        robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
 //        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
 
-        // Set Motor power Lavanya
+        // Set Motor power Lavanya 1
         // See Mecanum_Drive spreadsheet
-        robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
-        robot.lower_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
-        robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
-        robot.upper_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+//        robot.lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+//        robot.lower_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+//        robot.upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+//        robot.upper_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
 
-          return;
+        //Lavanya 3 (the wonder algorithm!!!)
+        robot.lower_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+        robot.lower_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 1.0
+        robot.upper_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+        robot.upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10)); // 0
+
+        return;
     }
 
     public void sgpManualArm()
@@ -135,25 +147,25 @@ public class Sgp_Manual extends LinearOpMode
         Servo activeServo = null;
         rampUp = gamepad2.right_trigger == 0f;
 
-        if( gamepad2.x)
-            activeServo = robot.Wrist_1;
-        else if (gamepad2.y)
-        {
-            if(rampUp) {
-                Wrist_pos += INCREMENT;
-                if(Wrist_pos >= 0.5)
-                    Wrist_pos = 0.5;
-            }
-            else
-            {
-                Wrist_pos -= INCREMENT;
-                if(Wrist_pos <= RANGE[0])
-                    Wrist_pos = RANGE[0];
-            }
-            robot.Wrist_2.setPosition(Wrist_pos);
-        }
+//        if( gamepad2.x)
+//            activeServo = robot.Shooter_Servo;
+//        else if (gamepad2.y)
+//        {
+//            if(rampUp) {
+//                Wrist_pos += INCREMENT;
+//                if(Wrist_pos >= 0.5)
+//                    Wrist_pos = 0.5;
+//            }
+//            else
+//            {
+//                Wrist_pos -= INCREMENT;
+//                if(Wrist_pos <= RANGE[0])
+//                    Wrist_pos = RANGE[0];
+//            }
+//            robot.Wrist_2.setPosition(Wrist_pos);
+//        }
             //activeServo = robot.Wrist_2;
-        else if( gamepad2.b) {
+         if( gamepad2.b) {
            if (rampUp) {
                 Finger_pos += INCREMENT;
                 if (Finger_pos >= RANGE[1])
@@ -225,28 +237,58 @@ public class Sgp_Manual extends LinearOpMode
 //        telemetry.addData("Active Servo: ", activeServoName);
 //        telemetry.addData("Active Servo set position", position);
 //        telemetry.addData("Servo Position: ", servoPosition);
-        telemetry.addData("Arm Motor Power", Arm_Power);
-        telemetry.update();
+        //telemetry.addData("Arm Motor Power", Arm_Power);
+       // telemetry.update();
 
         return;
     }
 
-    public void sgpManualShoot() {
-        if (gamepad2.dpad_left && speedAdjust >= 1) {
-            speedAdjust -= 1;
-            telemetry.addData("Current speed: ", "%f", speedAdjust);
-            telemetry.update();
+    public void sgpManualShoot()
+    {
+        //Shooter and pusher code
+        if (gamepad2.x) {
+            telemetry.addData("Shooter: ", shooterOn);
+            shooterOn = !shooterOn;
+            telemetry.addData("Shooter Toggle to:",shooterOn);
+            if(shooterOn) {
+                telemetry.addData("Turned on power at: ", "%f", shooter_power);
+            }
+            sleep(500);
+        }
+        else if( gamepad2.dpad_down ) {
+            shooter_power -= 0.1;
+            if( shooter_power < 0.1) {
+                shooter_power = 0.1;
+            }
+            sleep(500);
+            telemetry.addData("shooter_power: ", "%f",shooter_power);
+        }
+        else if(gamepad2.dpad_up ) {
+            shooter_power += 0.1;
+            if( shooter_power > 1.0) {
+                shooter_power = 1.0;
+            }
+            sleep(500);
+            telemetry.addData("shooter_power: ", "%f",shooter_power);
         }
 
-        if (gamepad2.dpad_right && speedAdjust <= 7) {
-            speedAdjust += 1;
-            telemetry.addData("Current speed: ", "%f", speedAdjust);
-            telemetry.update();
+        if(shooterOn) {
+            robot.Bravo_6.setPower(shooter_power);
+        }
+        else {
+            robot.Bravo_6.setPower(0);
         }
 
-        robot.Batman_Belt.setPower((gamepad2.right_stick_y) * (-speedAdjust / 10));
-        robot.Bravo_6.setPower((gamepad2.left_stick_y) * (-speedAdjust / 10));
+        if (gamepad2.left_trigger== 1f){
+            telemetry.addData("pusher position", robot.Shooter_Servo.getPosition());
+            robot.Shooter_Servo.setPosition(Pusher_Pos + 0.25);
+            telemetry.addData("pusher position", robot.Shooter_Servo.getPosition());
+            sleep(500);
+            robot.Shooter_Servo.setPosition(Pusher_Pos);
+            telemetry.addData("Pusher Servo","Push Complete");
+        }
 
+        telemetry.update();
         return;
     }
 }

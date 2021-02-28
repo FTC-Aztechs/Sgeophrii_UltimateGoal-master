@@ -125,28 +125,6 @@ public class Sgp_Autonomous extends LinearOpMode {
                 break;
         }
 
-//        // Pickup the second wobble goal
-//        PickupWobble2();
-//
-//        switch (Position) {
-//            case NONE:
-//                // Start from initial position, go to drop zone A,
-//                // drop the wobble goal, trace back to launch zone
-//                WobbleDropPositionA();
-//                break;
-//            case ONE:
-//                WobbleDropPositionB();
-//                break;
-//            case FOUR:
-//                WobbleDropPositionC();
-//                break;
-//        }
-//
-
-//
-//        // Navigate to stop on launch line.
-//        navigateToLaunchLine();
-
         telemetry.addData("Autonomous", "Complete");
         telemetry.update();
     }
@@ -157,19 +135,14 @@ public class Sgp_Autonomous extends LinearOpMode {
         if(opModeIsActive()) {
 
             // Go to Position A
-//            sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, -74, -74, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//            sgpAutoDrive(DRIVE_SPEED, 1, 1, 30.0);
-            sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, 52, 52, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-            sgpAutoDrive(DRIVE_SPEED, 21, 21, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            sgpAutoDrive(DRIVE_SPEED, -5, -5, 30);
+            sgpAutoStrafe(DRIVE_SPEED, 22, 22, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 24,24,  30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+
             dropWobbleOnField();
 
-            sgpAutoStrafe(DRIVE_SPEED, -24, -24, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 12, 12, 30.0);
-            // Return home
-//            sgpAutoDrive(DRIVE_SPEED, 6, 6, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, -6, -6, 30.0);
+            sgpAutoStrafe(DRIVE_SPEED, -22, -22, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 14, 14, 30.0);
 
             telemetry.addData("Status", "Reached Position A");
             telemetry.update();
@@ -179,17 +152,10 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     public void WobbleDropPositionB() {
         if(opModeIsActive()) {
-//            sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, -92, -92, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//            sgpAutoDrive(DRIVE_SPEED, 1, 1, 30.0);
-//            sgpAutoStrafe(DRIVE_SPEED, -15, -15, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, 70, 70, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-            sgpAutoDrive(DRIVE_SPEED, 45, 45, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//            sgpAutoStrafe(DRIVE_SPEED, 12, 12, 30.0);
-            dropWobbleOnField();
 
-//            sgpAutoDrive(DRIVE_SPEED, 22, 22, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, -22, -22, 30.0);
+            //sgpAutoStrafe(DRIVE_SPEED, 4, 4, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 42, 42, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            dropWobbleOnField();
 
             telemetry.addData("Status", "Reached Position B");
             telemetry.update();
@@ -200,16 +166,11 @@ public class Sgp_Autonomous extends LinearOpMode {
 
     public void WobbleDropPositionC() {
         if(opModeIsActive()) {
-//            sgpAutoStrafe(DRIVE_SPEED, -18, -18, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, -115, -115, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-//            sgpAutoDrive(DRIVE_SPEED, 1, 1, 30.0);
-            sgpAutoStrafe(DRIVE_SPEED, 24, 24, 30.0);
-//            sgpAutoDrive(DRIVE_SPEED, 101, 101, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-            sgpAutoDrive(DRIVE_SPEED, 70, 70, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
-
+            sgpAutoDrive(DRIVE_SPEED, -5, -5, 30);
+            sgpAutoStrafe(DRIVE_SPEED, 22, 22, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 68, 68, 30.0);  // S3: Forw
             dropWobbleOnField();
-
-            sgpAutoDrive(DRIVE_SPEED, -32, -32, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, -31, -31, 30.0);
 
             telemetry.addData("Status", "Reached Position C");
             telemetry.update();
@@ -281,12 +242,12 @@ public class Sgp_Autonomous extends LinearOpMode {
     public void sgpAutoShoot()
     {
         if(opModeIsActive()) {
-            sgpAutoDrive(1, 6, 6, 30);
-            sgpAutoStrafe(1, -15, -15, 30);
-            sgpAutoStrafe(1, 7, 7, 30);
-            sgpAutoDrive(1, 25,25,30);
-            robot.Bravo_6.setPower(0.85);
-            sleep(2000);
+            sgpAutoDrive(1, 7, 7, 30);
+            sgpAutoStrafe(1, -8, -8, 30);
+
+            sgpAutoDrive(1, 26,26,30);
+            robot.Bravo_6.setPower(0.95);
+            sleep(3000);
            for (int shootingTimes = 0; shootingTimes< 4; shootingTimes++) {
                robot.Shooter_Servo.setPosition(robot.Pusher_Pos + 0.25);
                sleep(500);
@@ -356,7 +317,7 @@ public class Sgp_Autonomous extends LinearOpMode {
                   (robot.areMotorsBusy(SgpRobot.SgpMotors.ALL_DRIVES)) )
             {
                 telemetry.addData("Target positions", "Left %7d : Right %7d", newLeftTarget, newRightTarget);
-                telemetry.addData("Current position", "Upper_Left %7d : Lower_Right %7d : Upper_Right %7d : Lower_Left %7d",
+                telemetry.addData("Current  position", "Upper_Left %7d : Lower_Right %7d : Upper_Right %7d : Lower_Left %7d",
                         robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_LEFT),
                         robot.getCurrentPosition(SgpRobot.SgpMotors.LOWER_RIGHT),
                         robot.getCurrentPosition(SgpRobot.SgpMotors.UPPER_RIGHT),
@@ -469,7 +430,7 @@ public class Sgp_Autonomous extends LinearOpMode {
 
         /*
          * The core values which define the location and size of the sample regions
-         */
+                */
         //static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(121000,60);
         static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,50);
 

@@ -55,6 +55,7 @@ public class SgpRobot
         UPPER_RIGHT,
         LOWER_RIGHT,
         ARM_MOTOR,
+        INTAKE,
         BRAVO6,
         BATMAN_BELT,
         ALL_DRIVES,
@@ -66,6 +67,7 @@ public class SgpRobot
     public DcMotor lower_left = null;
     public DcMotor lower_right = null;
     public DcMotor Arm_Motor = null;
+    public DcMotor Intake = null;
     public DcMotor Batman_Belt = null;
     public DcMotor Bravo_6 = null;
     public Servo Shooter_Servo = null;
@@ -100,6 +102,7 @@ public class SgpRobot
         lower_left = hwMap.get(DcMotor.class, "lower_left");
         lower_right = hwMap.get(DcMotor.class, "lower_right");
         Arm_Motor = hwMap.get(DcMotor.class, "Arm_Motor");
+        Intake = hwMap.get(DcMotor.class, "Intake");
         Batman_Belt = hwMap.get(DcMotor.class, "Batman_Belt");
         Bravo_6 = hwMap.get(DcMotor.class, "Bravo_6");
         Shooter_Servo = hwMap.get(Servo.class, "Wrist_1");
@@ -116,6 +119,7 @@ public class SgpRobot
         lower_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lower_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Arm_Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Batman_Belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Bravo_6.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -131,6 +135,7 @@ public class SgpRobot
         //lower_right.setDirection(DcMotor.Direction.FORWARD); //+
 
         Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
+        Intake.setDirection(DcMotor.Direction.REVERSE);
         Batman_Belt.setDirection(DcMotor.Direction.FORWARD);
         Bravo_6.setDirection(DcMotor.Direction.FORWARD);
         Shooter_Servo.setDirection(Servo.Direction.FORWARD );
@@ -140,7 +145,8 @@ public class SgpRobot
         //Shooter_Servo.setPosition(0);
         Wrist_2.setPosition(0.5);
         Finger.setPosition (0.0);
-        Pusher_Pos = Shooter_Servo.getPosition();    }
+        Pusher_Pos = Shooter_Servo.getPosition();
+    }
 
     public void initImuGyro()
     {
@@ -248,6 +254,9 @@ public class SgpRobot
             case ARM_MOTOR:
                 Arm_Motor.setMode(eMode);
                 break;
+            case INTAKE:
+                Intake.setMode(eMode);
+                break;
             case BRAVO6:
                 Bravo_6.setMode(eMode);
                 break;
@@ -288,14 +297,17 @@ public class SgpRobot
             case LOWER_RIGHT:
                 lower_right.setPower(dPower);
                 break;
+            case ARM_MOTOR:
+                Arm_Motor.setPower(dPower);
+                break;
+            case INTAKE:
+                Intake.setPower(dPower);
+                break;
             case BATMAN_BELT:
                 Batman_Belt.setPower(dPower);
                 break;
             case BRAVO6:
                 Bravo_6.setPower(dPower);
-                break;
-            case ARM_MOTOR:
-                Arm_Motor.setPower(dPower);
                 break;
             case ALL:
                 lower_right.setPower(dPower);
@@ -329,6 +341,8 @@ public class SgpRobot
                 return lower_right.getCurrentPosition();
             case ARM_MOTOR:
                 return Arm_Motor.getCurrentPosition();
+            case INTAKE:
+                return Intake.getCurrentPosition();
             case BRAVO6:
                 return Bravo_6.getCurrentPosition();
             case BATMAN_BELT:
@@ -355,6 +369,9 @@ public class SgpRobot
                 break;
             case LOWER_RIGHT:
                 lower_right.setTargetPosition(iPos);
+                break;
+            case INTAKE:
+                Intake.setTargetPosition(iPos);
                 break;
             case BATMAN_BELT:
                 Batman_Belt.setTargetPosition(iPos);
@@ -384,12 +401,14 @@ public class SgpRobot
                 return upper_right.isBusy();
             case LOWER_RIGHT: // lower right
                 return lower_right.isBusy();
+            case ARM_MOTOR:
+                return  Arm_Motor.isBusy();
+            case INTAKE:
+                return Intake.isBusy();
             case BRAVO6:
                 return Bravo_6.isBusy();
             case BATMAN_BELT:
                 return Batman_Belt.isBusy();
-            case ARM_MOTOR:
-                return  Arm_Motor.isBusy();
             case ALL_DRIVES: // All Drives
                 return lower_left.isBusy() && lower_right.isBusy() && upper_left.isBusy() && upper_right.isBusy();
             default:

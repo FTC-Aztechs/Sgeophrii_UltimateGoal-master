@@ -38,11 +38,16 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.Locale;
 
- /**
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
+/**
  * ToDo: Vishruth/Satvika - please document what this class does
  */
 
@@ -75,6 +80,7 @@ public class SgpRobot
     public Servo Finger = null;
     public ServoController FingerController = null;
     public BNO055IMU imu_gyro = null;
+    Orientation angles;
     OpenCvInternalCamera phoneCam;
     EasyOpenCVExample.SkystoneDeterminationPipeline pipeline;
 
@@ -82,6 +88,7 @@ public class SgpRobot
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
     double Pusher_Pos = 0;
+
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
@@ -140,12 +147,13 @@ public class SgpRobot
         Bravo_6.setDirection(DcMotor.Direction.FORWARD);
         Shooter_Servo.setDirection(Servo.Direction.FORWARD );
         Wrist_2.setDirection(Servo.Direction.FORWARD );
-        Finger.setDirection(Servo.Direction.FORWARD );
+        Finger.setDirection(Servo.Direction.REVERSE );
 
         //Shooter_Servo.setPosition(0);
-        Wrist_2.setPosition(0.5);
+        //Wrist_2.setPosition(0.5);
         Finger.setPosition (0.0);
         Pusher_Pos = Shooter_Servo.getPosition();
+
     }
 
     public void initImuGyro()
@@ -163,7 +171,10 @@ public class SgpRobot
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu_gyro.initialize(parameters);
+
+        angles = imu_gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
+
 
 //    public void imuTelemetry(Telemetry telemetry)
 //    {

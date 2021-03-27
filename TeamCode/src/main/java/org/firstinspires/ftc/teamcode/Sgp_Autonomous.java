@@ -104,9 +104,10 @@ public class Sgp_Autonomous extends LinearOpMode {
         telemetry.update();
 
         runtime.reset();
-        robot.Finger.setPosition(0.0);
+
 
         telemetry.setAutoClear(true);
+
 
         // Shoot preloaded rings
         sgpAutoShoot();
@@ -137,12 +138,12 @@ public class Sgp_Autonomous extends LinearOpMode {
             // Go to Position A
             sgpAutoDrive(DRIVE_SPEED, -5, -5, 30);
             sgpAutoStrafe(DRIVE_SPEED, 22, 22, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 24,24,  30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            sgpAutoDrive(DRIVE_SPEED, 26,26,  30.0);  // S3: Forward 13 Inches with 4 Sec timeout
 
             dropWobbleOnField();
 
             sgpAutoStrafe(DRIVE_SPEED, -22, -22, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 14, 14, 30.0);
+            sgpAutoDrive(DRIVE_SPEED, 13, 13, 30.0);
 
             telemetry.addData("Status", "Reached Position A");
             telemetry.update();
@@ -154,7 +155,7 @@ public class Sgp_Autonomous extends LinearOpMode {
         if(opModeIsActive()) {
 
             //sgpAutoStrafe(DRIVE_SPEED, 4, 4, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 42, 42, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
+            sgpAutoDrive(DRIVE_SPEED, 43, 43, 30.0);  // S3: Forward 13 Inches with 4 Sec timeout
             dropWobbleOnField();
 
             telemetry.addData("Status", "Reached Position B");
@@ -168,7 +169,7 @@ public class Sgp_Autonomous extends LinearOpMode {
         if(opModeIsActive()) {
             sgpAutoDrive(DRIVE_SPEED, -5, -5, 30);
             sgpAutoStrafe(DRIVE_SPEED, 22, 22, 30.0);
-            sgpAutoDrive(DRIVE_SPEED, 68, 68, 30.0);  // S3: Forw
+            sgpAutoDrive(DRIVE_SPEED, 71, 71, 30.0);  // S3: Forw
             dropWobbleOnField();
             sgpAutoDrive(DRIVE_SPEED, -31, -31, 30.0);
 
@@ -245,10 +246,10 @@ public class Sgp_Autonomous extends LinearOpMode {
             sgpAutoDrive(1, 7, 7, 30);
             sgpAutoStrafe(1, -8, -8, 30);
 
-            sgpAutoDrive(1, 26,26,30);
+            sgpAutoDrive(1, 24,24,30);
             robot.Bravo_6.setPower(0.95);
             sleep(3000);
-           for (int shootingTimes = 0; shootingTimes< 4; shootingTimes++) {
+           for (int shootingTimes = 0; shootingTimes< 1; shootingTimes++) {
                robot.Shooter_Servo.setPosition(robot.Pusher_Pos + 0.25);
                sleep(500);
                robot.Shooter_Servo.setPosition(robot.Pusher_Pos);
@@ -432,14 +433,14 @@ public class Sgp_Autonomous extends LinearOpMode {
          * The core values which define the location and size of the sample regions
                 */
         //static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(121000,60);
-        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,50);
+        static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(37,82);
 
 
         static final int REGION_WIDTH = 45;
         static final int REGION_HEIGHT = 35;
 
-        final int FOUR_RING_THRESHOLD = 160;
-        final int ONE_RING_THRESHOLD = 139;
+        final int FOUR_RING_THRESHOLD = 150;
+        final int ONE_RING_THRESHOLD = 140;
 
         Point region1_pointA = new Point(
                 REGION1_TOPLEFT_ANCHOR_POINT.x,
